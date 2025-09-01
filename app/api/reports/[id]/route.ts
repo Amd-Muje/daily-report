@@ -1,58 +1,73 @@
-// 1. Impor 'NextRequest' dan 'NextResponse' dari 'next/server'
-import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
-import dbConnect from '@/lib/mongoose';
-import Report from '@/models/Report';
+import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/auth";
+import dbConnect from "@/lib/mongoose";
+import Report from "@/models/Report";
 
-interface Params {
-  params: { id: string };
-}
-
-// 2. Ubah tipe 'request' menjadi 'NextRequest'
-export async function PUT(request: NextRequest, { params }: Params) {
+// PUT /api/reports/[id]
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   const session = await auth();
   if (!session?.user?.id) {
-    return NextResponse.json({ message: 'Not authenticated' }, { status: 401 });
+    return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
   }
 
+  const { id } = await params; // Next 15 validator: params berupa Promise
   await dbConnect();
 
   try {
     const body = await request.json();
     const updatedReport = await Report.findOneAndUpdate(
-      { _id: params.id, userId: session.user.id },
+      { _id: id, userId: session.user.id },
       body,
       { new: true }
     );
 
     if (!updatedReport) {
-      return NextResponse.json({ message: 'Report not found or user not authorized' }, { status: 404 });
+      return NextResponse.json(
+        { message: "Report not found or user not authorized" },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json(updatedReport);
-  } catch (_error) {
-    return NextResponse.json({ message: 'Server error' }, { status: 500 });
+  } catch {
+    return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }
 
-// 3. Ubah tipe 'request' menjadi 'NextRequest' di sini juga
-export async function DELETE(request: NextRequest, { params }: Params) {
+// DELETE /api/reports/[id]
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  // Tandai request sebagai "terpakai" supaya lolos no-unused-vars
+  void request;
+
   const session = await auth();
   if (!session?.user?.id) {
-    return NextResponse.json({ message: 'Not authenticated' }, { status: 401 });
+    return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
   }
 
+  const { id } = await params; // Next 15 validator: params berupa Promise
   await dbConnect();
 
   try {
-    const deletedReport = await Report.findOneAndDelete({ _id: params.id, userId: session.user.id });
+    const deletedReport = await Report.findOneAndDelete({
+      _id: id,
+      userId: session.user.id,
+    });
 
     if (!deletedReport) {
-      return NextResponse.json({ message: 'Report not found or user not authorized' }, { status: 404 });
+      return NextResponse.json(
+        { message: "Report not found or user not authorized" },
+        { status: 404 }
+      );
     }
 
-    return NextResponse.json({ message: 'Report deleted successfully' });
-  } catch (_error) {
-    return NextResponse.json({ message: 'Server error' }, { status: 500 });
+    return NextResponse.json({ message: "Report deleted successfully" });
+  } catch {
+    return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }
