@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { IReport as IReportData } from "@/models/Report";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -24,7 +23,6 @@ import {
     Edit,
     Trash,
     Copy,
-    Link as LinkIcon,
     Loader2,
 } from "lucide-react";
 // FIX: Hapus import Dialog yang tidak terpakai
@@ -37,7 +35,6 @@ import {
 // } from "@/components/ui/dialog";
 // import { Input } from "./ui/input";
 // import { Label } from "./ui/label";
-import axios from "axios";
 import { toast } from "sonner";
 
 type IReport = IReportData & { _id: string };
@@ -59,7 +56,6 @@ export function HistoryTable({
     onEdit,
     onDelete,
     onCopy,
-    onUpdate,
 }: HistoryTableProps) {
     // FIX: Hapus semua state dan fungsi yang berkaitan dengan dialog
     // const [isDialogOpen, setIsDialogOpen] = useState(false);
