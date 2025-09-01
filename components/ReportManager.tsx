@@ -50,7 +50,7 @@ export function ReportManager() {
         try {
             const response = await axios.get('/api/reports');
             setHistory(response.data);
-        } catch (error) {
+        } catch (_error) { // <-- FIX
             toast.error('Gagal mengambil riwayat laporan.');
         } finally {
             setIsFetchingHistory(false);
@@ -108,7 +108,7 @@ export function ReportManager() {
             }
             resetForm();
             fetchHistory();
-        } catch (error) {
+        } catch (_error) { // <-- FIX
             toast.error('Gagal menyimpan laporan.');
         } finally {
             setIsLoading(false);
@@ -168,7 +168,7 @@ export function ReportManager() {
                     resetForm();
                 }
                 fetchHistory();
-            } catch (error) {
+            } catch (_error) {
                 toast.error('Gagal menghapus laporan.');
             }
         }
