@@ -1,7 +1,9 @@
 import { auth } from "@/auth";
 import { AuthButtons } from "@/components/AuthButtons";
 import { ReportManager } from "@/components/ReportManager";
+import { MonthlySummary } from "@/components/MonthlySummary";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SavedSummaries } from "@/components/SavedSummaries";
 
 export default async function HomePage() {
 	const session = await auth();
@@ -33,6 +35,8 @@ export default async function HomePage() {
 				<AuthButtons />
 			</header>
 			<ReportManager />
+			<MonthlySummary />
+			<SavedSummaries />
 		</div>
 	);
 }

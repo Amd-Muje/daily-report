@@ -15,18 +15,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Trash2, PlusCircle, Copy, Save, Loader2, FileX2 } from "lucide-react";
-import type { IDoneItem, ITodoItem } from "@/models/Report"; // ← HANYA tipe yang dipakai
+import type { IDoneItem, ITodoItem } from "@/models/Report";
 import { HistoryTable, type IReportUI } from "./HistoryTable";
 
-// Tambahkan field opsional di sisi UI
 type DoneItemUI = IDoneItem & { documentationUrl?: string };
-
 type ReportWithId = IReportUI;
 type Status = "Complete" | "Incomplete";
+
+// Fungsi untuk format tanggal YYYY-MM-DD
+const formatDateForInput = (date: string | Date) => {
+  return new Date(date).toISOString().split('T')[0];
+};
 
 export function ReportManager() {
   const [name, setName] = useState("");
   const [status, setStatus] = useState<Status>("Complete");
+  const [reportDate, setReportDate] = useState(formatDateForInput(new Date())); // <-- STATE BARU
   const [doneItems, setDoneItems] = useState<DoneItemUI[]>([
     { description: "", startTime: "", endTime: "" },
   ]);
@@ -51,14 +55,13 @@ export function ReportManager() {
   useEffect(() => {
     const savedName = localStorage.getItem("report_user_name");
     if (savedName) setName(savedName);
-    void fetchHistory();
+    fetchHistory();
   }, [fetchHistory]);
 
   useEffect(() => {
     if (name) localStorage.setItem("report_user_name", name);
   }, [name]);
 
-  // Handler Done
   const handleDoneChange = (index: number, field: keyof DoneItemUI, value: string) => {
     const newItems = [...doneItems];
     newItems[index][field] = value as never;
@@ -69,7 +72,6 @@ export function ReportManager() {
   const removeDoneItem = (index: number) =>
     setDoneItems(doneItems.filter((_, i) => i !== index));
 
-  // Handler Todo
   const handleTodoChange = (index: number, value: string) => {
     const newItems = [...todoItems];
     newItems[index].description = value;
@@ -79,15 +81,14 @@ export function ReportManager() {
   const removeTodoItem = (index: number) =>
     setTodoItems(todoItems.filter((_, i) => i !== index));
 
-  // Reset form
   const resetForm = () => {
     setStatus("Complete");
     setDoneItems([{ description: "", startTime: "", endTime: "" }]);
     setTodoItems([{ description: "" }]);
     setEditingReportId(null);
+    setReportDate(formatDateForInput(new Date())); // Reset tanggal ke hari ini
   };
 
-  // Simpan / update
   const handleSave = async () => {
     if (!name) {
       toast.error("Nama wajib diisi.");
@@ -104,6 +105,7 @@ export function ReportManager() {
         status === "Incomplete"
           ? todoItems.filter((item) => item.description.trim())
           : [],
+      createdAt: new Date(reportDate), // <-- SERTAKAN TANGGAL
     };
 
     try {
@@ -115,15 +117,14 @@ export function ReportManager() {
         toast.success("Laporan berhasil disimpan!");
       }
       resetForm();
-      void fetchHistory();
+      fetchHistory();
     } catch {
       toast.error("Gagal menyimpan laporan.");
     } finally {
       setIsLoading(false);
     }
   };
-
-  // Generate teks untuk clipboard — TANPA any
+  
   const generateReportText = (
     report: Partial<Pick<ReportWithId, "name" | "status" | "doneItems" | "todoItems">>
   ) => {
@@ -136,7 +137,7 @@ export function ReportManager() {
 
     if (report.status === "Complete" && itemsToProcess.length > 0) {
       output += "Complete:\n";
-      itemsToProcess.forEach((item) => {
+      itemsToProcess.forEach((item: DoneItemUI) => {
         if (item.description.trim()) {
           const timeRange =
             item.startTime && item.endTime ? `(${item.startTime}-${item.endTime})` : "";
@@ -147,7 +148,7 @@ export function ReportManager() {
     }
     if (report.status === "Incomplete" && todoItemsToProcess.length > 0) {
       output += "Incomplete:\n";
-      todoItemsToProcess.forEach((item) => {
+      todoItemsToProcess.forEach((item: ITodoItem) => {
         if (item.description.trim()) {
           output += `[todo] ${item.description}\n`;
         }
@@ -168,6 +169,7 @@ export function ReportManager() {
     setEditingReportId(report._id);
     setName(report.name);
     setStatus(report.status);
+    setReportDate(formatDateForInput(report.createdAt)); // <-- SET TANGGAL SAAT EDIT
     setDoneItems(
       report.doneItems.length > 0
         ? (report.doneItems as DoneItemUI[])
@@ -184,7 +186,7 @@ export function ReportManager() {
         await axios.delete(`/api/reports/${id}`);
         toast.success("Laporan berhasil dihapus!");
         if (editingReportId === id) resetForm();
-        void fetchHistory();
+        fetchHistory();
       } catch {
         toast.error("Gagal menghapus laporan.");
       }
@@ -209,14 +211,24 @@ export function ReportManager() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+          {/* --- AREA INPUT BARU --- */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="md:col-span-1">
               <Label htmlFor="name">Nama</Label>
               <Input
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Masukkan nama Anda"
+              />
+            </div>
+            <div>
+              <Label htmlFor="reportDate">Tanggal Laporan</Label>
+              <Input
+                id="reportDate"
+                type="date"
+                value={reportDate}
+                onChange={(e) => setReportDate(e.target.value)}
               />
             </div>
             <div>
@@ -232,13 +244,14 @@ export function ReportManager() {
               </Select>
             </div>
           </div>
+          {/* --- AKHIR AREA INPUT BARU --- */}
 
           {status === "Complete" && (
             <div className="space-y-4 rounded-md border p-4 bg-background">
               <Label className="font-semibold text-green-600 dark:text-green-500">
                 Tugas Selesai
               </Label>
-              {doneItems.map((item, index) => (
+              {doneItems.map((item: DoneItemUI, index: number) => (
                 <div
                   key={index}
                   className="flex flex-col md:flex-row w-full items-stretch md:items-center gap-2"
@@ -263,15 +276,6 @@ export function ReportManager() {
                       onChange={(e) => handleDoneChange(index, "endTime", e.target.value)}
                       className="flex-shrink-0 w-[110px]"
                     />
-                    {/* Uncomment jika ingin input URL dokumentasi di form utama:
-                    <Input
-                      type="url"
-                      value={item.documentationUrl ?? ""}
-                      onChange={(e) => handleDoneChange(index, "documentationUrl", e.target.value)}
-                      placeholder="Link dokumentasi (opsional)"
-                      className="w-[220px]"
-                    />
-                    */}
                     <Button
                       variant="ghost"
                       size="icon"
@@ -294,7 +298,7 @@ export function ReportManager() {
               <Label className="font-semibold text-orange-600 dark:text-orange-500">
                 Tugas Belum Selesai
               </Label>
-              {todoItems.map((item, index) => (
+              {todoItems.map((item: ITodoItem, index: number) => (
                 <div key={index} className="flex items-center gap-2">
                   <Input
                     value={item.description}

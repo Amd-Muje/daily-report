@@ -6,21 +6,22 @@ import Report from "@/models/Report";
 // PUT /api/reports/[id]
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
   }
 
-  const { id } = await params; // Next 15 validator: params berupa Promise
+  const { id } = params;
   await dbConnect();
 
   try {
     const body = await request.json();
+    // Kita pastikan untuk menyertakan createdAt dalam data yang diupdate
     const updatedReport = await Report.findOneAndUpdate(
       { _id: id, userId: session.user.id },
-      body,
+      { $set: body }, // Gunakan $set untuk memastikan semua field ter-update
       { new: true }
     );
 
@@ -32,7 +33,8 @@ export async function PUT(
     }
 
     return NextResponse.json(updatedReport);
-  } catch {
+  } catch (error) { // Tambahkan variabel error
+    console.error("Update error:", error); // Log error untuk debugging
     return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }
