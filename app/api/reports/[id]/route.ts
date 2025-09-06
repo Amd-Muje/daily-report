@@ -6,14 +6,14 @@ import Report from "@/models/Report";
 // PUT /api/reports/[id]
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } } // FIX: 'params' adalah objek, bukan Promise
+  { params }: { params: { id: string } }
 ) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
   }
 
-  const { id } = params; // FIX: Akses 'id' langsung tanpa 'await'
+  const { id } = params;
   await dbConnect();
 
   try {
@@ -41,7 +41,7 @@ export async function PUT(
 // DELETE /api/reports/[id]
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } } // FIX: 'params' adalah objek, bukan Promise
+  { params }: { params: { id: string } }
 ) {
   // Tandai request sebagai "terpakai" supaya lolos no-unused-vars
   void request;
@@ -51,7 +51,7 @@ export async function DELETE(
     return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
   }
 
-  const { id } = params; // FIX: Akses 'id' langsung tanpa 'await'
+  const { id } = params;
   await dbConnect();
 
   try {
