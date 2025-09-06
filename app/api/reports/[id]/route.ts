@@ -6,22 +6,23 @@ import Report from "@/models/Report";
 // PUT /api/reports/[id]
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  // PERBAIKAN 1: Tipe params sekarang adalah Promise
+  { params }: { params: Promise<{ id: string }> } 
 ) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
   }
 
-  const { id } = params;
+  // PERBAIKAN 2: Gunakan 'await' untuk mendapatkan nilai dari params
+  const { id } = await params; 
   await dbConnect();
 
   try {
     const body = await request.json();
-    // Kita pastikan untuk menyertakan createdAt dalam data yang diupdate
     const updatedReport = await Report.findOneAndUpdate(
       { _id: id, userId: session.user.id },
-      { $set: body }, // Gunakan $set untuk memastikan semua field ter-update
+      { $set: body },
       { new: true }
     );
 
@@ -33,8 +34,8 @@ export async function PUT(
     }
 
     return NextResponse.json(updatedReport);
-  } catch (error) { // Tambahkan variabel error
-    console.error("Update error:", error); // Log error untuk debugging
+  } catch (error) {
+    console.error("Update error:", error);
     return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }
@@ -42,6 +43,7 @@ export async function PUT(
 // DELETE /api/reports/[id]
 export async function DELETE(
   request: NextRequest,
+  // PERBAIKAN 3: Pastikan tipe di sini juga benar
   { params }: { params: Promise<{ id: string }> }
 ) {
   // Tandai request sebagai "terpakai" supaya lolos no-unused-vars
@@ -52,7 +54,8 @@ export async function DELETE(
     return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
   }
 
-  const { id } = await params; // Next 15 validator: params berupa Promise
+  // PERBAIKAN 4: Gunakan 'await' juga di sini
+  const { id } = await params; 
   await dbConnect();
 
   try {
