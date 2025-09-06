@@ -346,7 +346,7 @@ export function ReportManager() {
         <h2 className="text-2xl font-bold mb-4 text-center md:text-left">Riwayat Laporan</h2>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           <HistoryTable
-            title="✅ Laporan Selesai"
+            title="✅ Done"
             reports={completeReports}
             isLoading={isFetchingHistory}
             onEdit={handleEdit}
@@ -355,7 +355,7 @@ export function ReportManager() {
             onUpdate={fetchHistory}
           />
           <HistoryTable
-            title="📝 Laporan Belum Selesai"
+            title="📝 Todo"
             reports={incompleteReports}
             isLoading={isFetchingHistory}
             onEdit={handleEdit}
