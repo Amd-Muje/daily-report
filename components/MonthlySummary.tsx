@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Loader2, FileText, Copy } from 'lucide-react';
-import type { IReportUI } from './HistoryTable'; // Impor tipe
+import type { IReportUI } from './HistoryTable';
 
 export function MonthlySummary() {
   const router = useRouter();
@@ -38,11 +38,12 @@ export function MonthlySummary() {
       const params = new URLSearchParams();
       params.set('activity', encodeURIComponent(activitySummary));
       params.set('result', encodeURIComponent(resultSummary));
-      params.set('month', selectedMonth); // Kirim bulan
-      params.set('year', selectedYear);   // Kirim tahun
+      params.set('month', selectedMonth);
+      params.set('year', selectedYear);
       
       router.push(`/summary?${params.toString()}`);
-    } catch (error: unknown ) {
+
+    } catch (_error) { // <-- PERBAIKAN 1
       toast.error('Gagal membuat ringkasan laporan.');
     } finally {
       setIsGenerating(false);
@@ -60,7 +61,7 @@ export function MonthlySummary() {
         return;
       }
       
-     const formattedText = reports.reverse().map(report => {
+      const formattedText = reports.reverse().map(report => {
         // <-- PERBAIKAN 2: Gunakan variabel 'date'
         const date = new Date(report.createdAt).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
         const doneItems = (report.doneItems || []).map(item => `[done] ${item.description} (${item.startTime}-${item.endTime})`).join('\n');
@@ -70,7 +71,7 @@ export function MonthlySummary() {
       await navigator.clipboard.writeText(formattedText);
       toast.success(`${reports.length} laporan selesai berhasil disalin!`);
 
-    } catch (error: unknown ) {
+    } catch (_error) { // <-- PERBAIKAN 3
       toast.error('Gagal menyalin laporan.');
     } finally {
       setIsCopying(false);

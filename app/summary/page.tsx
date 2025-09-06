@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { useState, Suspense } from 'react'; // Impor Suspense
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -9,15 +9,12 @@ import { ArrowLeft, Save, CheckCircle, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'sonner';
 
-export default function SummaryPage() {
+// 1. Logika utama dipindahkan ke komponen baru ini
+function SummaryView() {
   const searchParams = useSearchParams();
   
-  // --- PERUBAHAN DI SINI ---
-  // Kita decode komponen URI saat mengambilnya dari search params
   const activitySummary = searchParams.get('activity') ? decodeURIComponent(searchParams.get('activity')!) : null;
   const resultSummary = searchParams.get('result') ? decodeURIComponent(searchParams.get('result')!) : null;
-  // -------------------------
-
   const month = searchParams.get('month');
   const year = searchParams.get('year');
   
@@ -39,7 +36,7 @@ export default function SummaryPage() {
       });
       toast.success('Ringkasan berhasil disimpan!');
       setIsSaved(true);
-    } catch (error: unknown ) {
+    } catch (_error) {
       toast.error('Gagal menyimpan ringkasan.');
     } finally {
       setIsSaving(false);
@@ -99,4 +96,13 @@ export default function SummaryPage() {
       </Card>
     </div>
   );
+}
+
+// 2. Halaman utama sekarang hanya me-render komponen di atas dengan Suspense
+export default function SummaryPage() {
+    return (
+        <Suspense fallback={<div className="flex h-screen items-center justify-center">Memuat ringkasan...</div>}>
+            <SummaryView />
+        </Suspense>
+    );
 }
