@@ -43,7 +43,7 @@ export function MonthlySummary() {
       
       router.push(`/summary?${params.toString()}`);
 
-    } catch (error: unknown) { // <-- PERBAIKAN 1
+    } catch { // <-- PERBAIKAN 1
       toast.error('Gagal membuat ringkasan laporan.');
     } finally {
       setIsGenerating(false);
@@ -71,7 +71,7 @@ export function MonthlySummary() {
       await navigator.clipboard.writeText(formattedText);
       toast.success(`${reports.length} laporan selesai berhasil disalin!`);
 
-    } catch (error: unknown) { // <-- PERBAIKAN 3
+    } catch {
       toast.error('Gagal menyalin laporan.');
     } finally {
       setIsCopying(false);
