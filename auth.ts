@@ -6,12 +6,11 @@ import clientPromise from "@/lib/mongodb";
 export const { handlers, signIn, signOut, auth } = NextAuth({
 	providers: [
 		Google({
-			clientId: process.env.GOOGLE_CLIENT_ID,
-			clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+			clientId: process.env.GOOGLE_CLIENT_ID!,
+			clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
 		}),
 	],
-	// PERBAIKAN: Hanya gunakan adapter jika bukan dalam proses build Vercel
-	adapter: process.env.VERCEL ? undefined : MongoDBAdapter(clientPromise),
+	adapter: MongoDBAdapter(clientPromise),
 	session: {
 		strategy: "jwt",
 	},
