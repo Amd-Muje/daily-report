@@ -7,7 +7,7 @@ import Report from "@/models/Report";
 export async function PUT(
   request: NextRequest,
   // PERBAIKAN 1: Tipe params sekarang adalah Promise
-  { params }: { params: Promise<{ id: string }> } 
+  { params }: { params: { id: string } } 
 ) {
   const session = await auth();
   if (!session?.user?.id) {
@@ -15,7 +15,7 @@ export async function PUT(
   }
 
   // PERBAIKAN 2: Gunakan 'await' untuk mendapatkan nilai dari params
-  const { id } = await params; 
+  const { id } = params; 
   await dbConnect();
 
   try {
@@ -44,7 +44,7 @@ export async function PUT(
 export async function DELETE(
   request: NextRequest,
   // PERBAIKAN 3: Pastikan tipe di sini juga benar
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   // Tandai request sebagai "terpakai" supaya lolos no-unused-vars
   void request;
@@ -55,7 +55,7 @@ export async function DELETE(
   }
 
   // PERBAIKAN 4: Gunakan 'await' juga di sini
-  const { id } = await params; 
+  const { id } = params;
   await dbConnect();
 
   try {
