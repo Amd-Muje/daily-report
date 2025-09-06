@@ -36,7 +36,7 @@ function SummaryView() {
       });
       toast.success('Ringkasan berhasil disimpan!');
       setIsSaved(true);
-    } catch (error : unknown) {
+    } catch { // FIX: Variabel 'error' yang tidak terpakai dihapus
       toast.error('Gagal menyimpan ringkasan.');
     } finally {
       setIsSaving(false);
