@@ -46,7 +46,6 @@ export async function POST(request: Request) {
 
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
-    // --- PROMPT BARU ---
     const prompt = `
       Anda adalah seorang asisten ahli yang bertugas menyusun laporan kerja bulanan. Berdasarkan data laporan harian berikut, buatlah DUA buah ringkasan terpisah dalam format naratif yang koheren.
 
@@ -84,8 +83,13 @@ export async function POST(request: Request) {
         const response = await result.response;
         fullSummary = response.text();
         break;
-      } catch (error: any) {
-        const isServiceUnavailable = error.message && error.message.includes("503");
+      } catch (error: unknown) { // <-- PERBAIKAN DI SINI
+        let isServiceUnavailable = false;
+        // Cek tipe error sebelum mengakses propertinya
+        if (error instanceof Error) {
+            isServiceUnavailable = error.message.includes("503");
+        }
+        
         if (isServiceUnavailable && i < retries - 1) {
           console.warn(`Attempt ${i + 1} failed. Retrying in ${i + 1} second(s)...`);
           await delay((i + 1) * 1000);
@@ -95,7 +99,6 @@ export async function POST(request: Request) {
       }
     }
 
-    // Memisahkan dua jenis ringkasan
     const parts = fullSummary.split('---PEMISAH---');
     const activitySummary = parts[0]?.replace('[RINGKASAN_AKTIVITAS]', '').trim() || 'Gagal menghasilkan ringkasan aktivitas.';
     const resultSummary = parts[1]?.replace('[RINGKASAN_HASIL_KERJA]', '').trim() || 'Gagal menghasilkan ringkasan hasil kerja.';

@@ -39,7 +39,7 @@ export default function SummaryPage() {
       });
       toast.success('Ringkasan berhasil disimpan!');
       setIsSaved(true);
-    } catch (error) {
+    } catch (error: unknown ) {
       toast.error('Gagal menyimpan ringkasan.');
     } finally {
       setIsSaving(false);

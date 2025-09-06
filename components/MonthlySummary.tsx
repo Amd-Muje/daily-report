@@ -42,7 +42,7 @@ export function MonthlySummary() {
       params.set('year', selectedYear);   // Kirim tahun
       
       router.push(`/summary?${params.toString()}`);
-    } catch (error) {
+    } catch (error: unknown ) {
       toast.error('Gagal membuat ringkasan laporan.');
     } finally {
       setIsGenerating(false);
@@ -60,16 +60,17 @@ export function MonthlySummary() {
         return;
       }
       
-      const formattedText = reports.reverse().map(report => {
+     const formattedText = reports.reverse().map(report => {
+        // <-- PERBAIKAN 2: Gunakan variabel 'date'
         const date = new Date(report.createdAt).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
         const doneItems = (report.doneItems || []).map(item => `[done] ${item.description} (${item.startTime}-${item.endTime})`).join('\n');
-        return `dailyreport\n${report.name}\n\nComplete:\n${doneItems}`;
+        return `dailyreport\n${report.name}\nTanggal: ${date}\n\nComplete:\n${doneItems}`;
       }).join('\n\n====================\n\n');
 
       await navigator.clipboard.writeText(formattedText);
       toast.success(`${reports.length} laporan selesai berhasil disalin!`);
 
-    } catch (error) {
+    } catch (error: unknown ) {
       toast.error('Gagal menyalin laporan.');
     } finally {
       setIsCopying(false);
