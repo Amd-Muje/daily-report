@@ -6,16 +6,14 @@ import Report from "@/models/Report";
 // PUT /api/reports/[id]
 export async function PUT(
   request: NextRequest,
-  // PERBAIKAN 1: Tipe params sekarang adalah Promise
-  { params }: { params: { id: string } } 
+  { params }: { params: { id: string } } // FIX: 'params' adalah objek, bukan Promise
 ) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
   }
 
-  // PERBAIKAN 2: Gunakan 'await' untuk mendapatkan nilai dari params
-  const { id } = params; 
+  const { id } = params; // FIX: Akses 'id' langsung tanpa 'await'
   await dbConnect();
 
   try {
@@ -43,8 +41,7 @@ export async function PUT(
 // DELETE /api/reports/[id]
 export async function DELETE(
   request: NextRequest,
-  // PERBAIKAN 3: Pastikan tipe di sini juga benar
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } } // FIX: 'params' adalah objek, bukan Promise
 ) {
   // Tandai request sebagai "terpakai" supaya lolos no-unused-vars
   void request;
@@ -54,8 +51,7 @@ export async function DELETE(
     return NextResponse.json({ message: "Not authenticated" }, { status: 401 });
   }
 
-  // PERBAIKAN 4: Gunakan 'await' juga di sini
-  const { id } = params;
+  const { id } = params; // FIX: Akses 'id' langsung tanpa 'await'
   await dbConnect();
 
   try {
